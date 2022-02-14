@@ -4,17 +4,24 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import android.os.Handler
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import kotlin.random.Random
 
 class WorkerScheduler (val context: Context, params: WorkerParameters): Worker(context, params){
     companion object {
+        const val NOTIF_ID = 1001
         const val NOTIF_LABEL = "notif_label"
         const val NOTIF_MSG = "notif_msg"
         const val NOTIF_VALIDITY = "notif_validity"
     }
+    val handler by lazy {
+        Handler(context.mainLooper)
+    }
+    lateinit var handleRunnable: Runnable
 
     override fun doWork(): Result {
         val label = inputData.getString(NOTIF_LABEL)
@@ -51,6 +58,37 @@ class WorkerScheduler (val context: Context, params: WorkerParameters): Worker(c
             .setAutoCancel(true)
             .setChannelId(channelID)
 
-        notificationManager.notify(Random.nextInt(), builder.build())
+        val PROGRESS_MAX = validity?.toInt() //secs
+        var PROGRESS = 0
+
+        NotificationManagerCompat.from(context).apply {
+            handleRunnable = object : Runnable {
+                override fun run() {
+                    if (PROGRESS == PROGRESS_MAX) {
+                        // timer completes
+                        builder.setContentTitle("Deal is over")
+                        builder.setProgress(0, 0, false)
+
+                        notificationManager.cancel(NOTIF_ID)
+                        handler.removeCallbacks(this)
+                        return
+                    }
+
+                    builder.setProgress(PROGRESS_MAX!!, PROGRESS, false)
+                    notify(NOTIF_ID, builder.build())
+                    PROGRESS += 1
+                    builder.setContentTitle("Time left: " + (PROGRESS_MAX - PROGRESS).toString() + " secs")
+
+                    builder.setSilent(true)
+                    handler.postDelayed(this, 1000) //1 sec delay
+                }
+
+            }
+
+            handler.post(handleRunnable)
+
+        }
+
+        notificationManager.notify(NOTIF_ID, builder.build())
     }
 }
