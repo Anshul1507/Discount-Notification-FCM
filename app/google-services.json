@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "760827991399",
+    "project_id": "fcm-offersnotification",
+    "storage_bucket": "fcm-offersnotification.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:760827991399:android:94023d1f990a28752f0bc2",
+        "android_client_info": {
+          "package_name": "com.github.Anshul1507.discountnotificationfcm"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "760827991399-t6aug3fpa20phq135q0gbv8mi8aec8jk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.github.Anshul1507.discountnotificationfcm",
+            "certificate_hash": "1f06dda329e153425c86820162ccba5624b5c5e0"
+          }
+        },
+        {
+          "client_id": "760827991399-cop60uh0nmsb67t7j0c1ji5r1o8rp3ho.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1VzjbmRYLw7mReRrkjMzwjNnhiqcQc1Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "760827991399-cop60uh0nmsb67t7j0c1ji5r1o8rp3ho.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

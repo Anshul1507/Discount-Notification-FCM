@@ -3,6 +3,11 @@
     package="com.github.Anshul1507.discountnotificationfcm">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+
 
     <application
         android:allowBackup="true"
@@ -21,8 +26,15 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".ForegroundService"
-            android:exported="false"/>
+        <service
+            android:name=".FCMService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <receiver android:name=".AlarmBroadcastReceiver" android:enabled="true" />
     </application>
 
 </manifest>
