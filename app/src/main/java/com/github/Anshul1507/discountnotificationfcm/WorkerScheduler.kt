@@ -2,7 +2,9 @@ package com.github.Anshul1507.discountnotificationfcm
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Handler
 import androidx.core.app.NotificationCompat
@@ -52,7 +54,12 @@ class WorkerScheduler(val context: Context, params: WorkerParameters) : Worker(c
         val priority = NotificationCompat.PRIORITY_HIGH
         val icon = R.drawable.ic_launcher_background
 
+        val intent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
+        //dismiss local notif ID => "D-1003" [if notif_id from server is 1003]
+        intent.action = ("D-" + ID)
 
+        val dismissIntent: PendingIntent =
+            PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         val builder = NotificationCompat.Builder(context.applicationContext, channelID)
             .setContentTitle(label)
             .setContentText(msg)
@@ -60,6 +67,7 @@ class WorkerScheduler(val context: Context, params: WorkerParameters) : Worker(c
             .setPriority(priority)
             .setAutoCancel(true)
             .setChannelId(channelID)
+            .addAction(android.R.drawable.ic_delete, "Dismiss", dismissIntent)
 
         val PROGRESS_MAX = validity?.toInt() //secs
         var PROGRESS = 0
