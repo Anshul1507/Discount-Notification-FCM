@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.NOTIF_ID
 import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.NOTIF_LABEL
 import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.NOTIF_MSG
 import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.NOTIF_VALIDITY
@@ -20,6 +21,7 @@ class FCMService : FirebaseMessagingService() {
         if (message.data.isNotEmpty()) {
             message.data.also {
                 val data = Message(
+                    it["id"],
                     it["label"],
                     it["message"],
                     it["validity"],
@@ -39,6 +41,7 @@ class FCMService : FirebaseMessagingService() {
 
         val intent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+        intent.putExtra(NOTIF_ID, message.id)
         intent.putExtra(NOTIF_LABEL, message.label)
         intent.putExtra(NOTIF_MSG, message.message)
         intent.putExtra(NOTIF_VALIDITY, message.validity)
