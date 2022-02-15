@@ -5,12 +5,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.NOTIF_FIXED
-import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.NOTIF_ID
-import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.NOTIF_LABEL
-import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.NOTIF_MSG
-import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.NOTIF_REMOVE_ON_OFFER_ENDS
-import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.NOTIF_VALIDITY
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import java.text.SimpleDateFormat
@@ -22,7 +16,7 @@ class FCMService : FirebaseMessagingService() {
         //if message.data not empty
         if (message.data.isNotEmpty()) {
             message.data.also {
-                val data = Message(
+                val msg = Message(
                     it["id"],
                     it["label"],
                     it["message"],
@@ -31,30 +25,24 @@ class FCMService : FirebaseMessagingService() {
                     it["notif_fixed"].toBoolean(),
                     it["notif_remove_on_offer_ends"].toBoolean()
                 )
-                WorkerScheduler.data = data
+                WorkerScheduler.data = msg
 
-                Log.d("fcm data: ", data.toString())
+                Log.d("fcm data: ", msg.toString())
 
-                scheduleAlarm(data)
+                val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                val time = sdf.parse(msg.time!!)?.time!!
+
+                scheduleAlarm(time)
             }
         }
     }
 
-    private fun scheduleAlarm(message: Message) {
+    private fun scheduleAlarm(time: Long) {
         val alarmManager: AlarmManager =
             applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         val intent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-        intent.putExtra(NOTIF_ID, message.id)
-        intent.putExtra(NOTIF_LABEL, message.label)
-        intent.putExtra(NOTIF_MSG, message.message)
-        intent.putExtra(NOTIF_VALIDITY, message.validity)
-        intent.putExtra(NOTIF_FIXED, message.isNotificationFixed)
-        intent.putExtra(NOTIF_REMOVE_ON_OFFER_ENDS, message.isNotificationRemoveOnOfferEnds)
-
-        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        val time = sdf.parse(message.time!!)?.time!!
 
         val alarmIntent = PendingIntent.getBroadcast(
             applicationContext,

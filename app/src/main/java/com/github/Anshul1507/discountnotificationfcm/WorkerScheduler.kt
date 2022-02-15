@@ -8,51 +8,26 @@ import android.content.Intent
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 
 
-class WorkerScheduler(val context: Context, params: WorkerParameters) : Worker(context, params) {
+class WorkerScheduler(private val context: Context, params: WorkerParameters) : Worker(context, params) {
     companion object {
-        const val NOTIF_ID = "notif_id"
-        const val NOTIF_LABEL = "notif_label"
-        const val NOTIF_MSG = "notif_msg"
-        const val NOTIF_VALIDITY = "notif_validity"
-        const val NOTIF_FIXED = "notif_fixed"
-        const val NOTIF_REMOVE_ON_OFFER_ENDS = "notif_remove_offer_ends"
-
         val handler: Handler = Handler(Looper.getMainLooper())
-
         lateinit var data: Message
     }
 
     lateinit var handleRunnable: Runnable
 
-
     override fun doWork(): Result {
-        val id = inputData.getString(NOTIF_ID)?.toInt()
-        val label = inputData.getString(NOTIF_LABEL)
-        val msg = inputData.getString(NOTIF_MSG)
-        val validity = inputData.getString(NOTIF_VALIDITY)
-        val isNotifFixed = inputData.getBoolean(NOTIF_FIXED, false)
-        val isNotifRemoveOnOfferEnds = inputData.getBoolean(NOTIF_REMOVE_ON_OFFER_ENDS, false)
-
-        showNotification(id!!, label, msg, validity, isNotifFixed, isNotifRemoveOnOfferEnds)
-
+        showNotification()
         return Result.failure()
     }
 
-    private fun showNotification(
-        ID: Int,
-        label: String?,
-        msg: String?,
-        validity: String?,
-        isNotifFixed: Boolean,
-        isNotifRemoveOnOfferEnds: Boolean
-    ) {
+    private fun showNotification() {
         val channelID = "notif_offers"
         val channelLabel = "Offers"
 
@@ -71,45 +46,45 @@ class WorkerScheduler(val context: Context, params: WorkerParameters) : Worker(c
 
         val intent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
         //dismiss local notif ID => "D-1003" [if notif_id from server is 1003]
-        intent.action = ("D-" + ID)
+        intent.action = ("D-" + data.id)
 
         val dismissIntent: PendingIntent =
             PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         val builder = NotificationCompat.Builder(context.applicationContext, channelID)
-            .setContentTitle(label)
-            .setContentText(msg)
+            .setContentTitle(data.label)
+            .setContentText(data.message)
             .setSmallIcon(icon)
             .setPriority(priority)
             .setAutoCancel(true)
             .setChannelId(channelID)
             .addAction(android.R.drawable.ic_delete, "Dismiss", dismissIntent)
 
-        if (isNotifFixed) {
+        if (data.isNotificationFixed) {
             builder.setAutoCancel(false) //auto-cancel means remove notification on click on that
                 .setOngoing(true) //this is the state where notification is non-swipe-able
         }
 
-        val PROGRESS_MAX = validity?.toInt() //secs
+        val PROGRESS_MAX = data.validity?.toInt() //secs
         var PROGRESS = 0
 
         NotificationManagerCompat.from(context).apply {
             handleRunnable = object : Runnable {
                 override fun run() {
-                    if (PROGRESS == PROGRESS_MAX!!+1) {
+                    if (PROGRESS == PROGRESS_MAX!! + 1) {
                         // timer completes
                         builder.setContentTitle("Deal is over")
                         builder.setProgress(0, 0, false)
-                        notify(ID, builder.build())
+                        notify(data.id!!.toInt(), builder.build())
 
-                        if(isNotifRemoveOnOfferEnds) {
-                            notificationManager.cancel(ID)
+                        if (data.isNotificationRemoveOnOfferEnds) {
+                            notificationManager.cancel(data.id!!.toInt())
                         }
                         handler.removeCallbacks(this)
                         return
                     }
 
                     builder.setProgress(PROGRESS_MAX, PROGRESS, false)
-                    notify(ID, builder.build())
+                    notify(data.id!!.toInt(), builder.build())
                     PROGRESS += 1
                     builder.setContentTitle("Time left: " + (PROGRESS_MAX - PROGRESS).toString() + " secs")
 
@@ -123,6 +98,6 @@ class WorkerScheduler(val context: Context, params: WorkerParameters) : Worker(c
 
         }
 
-        notificationManager.notify(ID, builder.build())
+        notificationManager.notify(data.id!!.toInt(), builder.build())
     }
 }
