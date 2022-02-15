@@ -22,6 +22,7 @@ class WorkerScheduler(val context: Context, params: WorkerParameters) : Worker(c
         const val NOTIF_MSG = "notif_msg"
         const val NOTIF_VALIDITY = "notif_validity"
         const val NOTIF_FIXED = "notif_fixed"
+        const val NOTIF_REMOVE_ON_OFFER_ENDS = "notif_remove_offer_ends"
 
         val handler: Handler = Handler(Looper.getMainLooper())
 
@@ -37,8 +38,9 @@ class WorkerScheduler(val context: Context, params: WorkerParameters) : Worker(c
         val msg = inputData.getString(NOTIF_MSG)
         val validity = inputData.getString(NOTIF_VALIDITY)
         val isNotifFixed = inputData.getBoolean(NOTIF_FIXED, false)
+        val isNotifRemoveOnOfferEnds = inputData.getBoolean(NOTIF_REMOVE_ON_OFFER_ENDS, false)
 
-        showNotification(id!!, label, msg, validity, isNotifFixed)
+        showNotification(id!!, label, msg, validity, isNotifFixed, isNotifRemoveOnOfferEnds)
 
         return Result.failure()
     }
@@ -48,7 +50,8 @@ class WorkerScheduler(val context: Context, params: WorkerParameters) : Worker(c
         label: String?,
         msg: String?,
         validity: String?,
-        isNotifFixed: Boolean
+        isNotifFixed: Boolean,
+        isNotifRemoveOnOfferEnds: Boolean
     ) {
         val channelID = "notif_offers"
         val channelLabel = "Offers"
@@ -92,17 +95,20 @@ class WorkerScheduler(val context: Context, params: WorkerParameters) : Worker(c
         NotificationManagerCompat.from(context).apply {
             handleRunnable = object : Runnable {
                 override fun run() {
-                    if (PROGRESS == PROGRESS_MAX) {
+                    if (PROGRESS == PROGRESS_MAX!!+1) {
                         // timer completes
                         builder.setContentTitle("Deal is over")
                         builder.setProgress(0, 0, false)
+                        notify(ID, builder.build())
 
-                        notificationManager.cancel(ID)
+                        if(isNotifRemoveOnOfferEnds) {
+                            notificationManager.cancel(ID)
+                        }
                         handler.removeCallbacks(this)
                         return
                     }
 
-                    builder.setProgress(PROGRESS_MAX!!, PROGRESS, false)
+                    builder.setProgress(PROGRESS_MAX, PROGRESS, false)
                     notify(ID, builder.build())
                     PROGRESS += 1
                     builder.setContentTitle("Time left: " + (PROGRESS_MAX - PROGRESS).toString() + " secs")

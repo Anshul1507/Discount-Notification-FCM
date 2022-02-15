@@ -7,4 +7,5 @@ data class Message(
     val validity: String?,
     val time: String?,
     val isNotificationFixed: Boolean,
+    val isNotificationRemoveOnOfferEnds: Boolean,
 )

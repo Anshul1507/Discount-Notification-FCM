@@ -9,6 +9,7 @@ import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.N
 import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.NOTIF_ID
 import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.NOTIF_LABEL
 import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.NOTIF_MSG
+import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.NOTIF_REMOVE_ON_OFFER_ENDS
 import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.NOTIF_VALIDITY
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -27,7 +28,8 @@ class FCMService : FirebaseMessagingService() {
                     it["message"],
                     it["validity"],
                     it["time"],
-                    it["notif_fixed"].toBoolean()
+                    it["notif_fixed"].toBoolean(),
+                    it["notif_remove_on_offer_ends"].toBoolean()
                 )
                 WorkerScheduler.data = data
 
@@ -49,6 +51,7 @@ class FCMService : FirebaseMessagingService() {
         intent.putExtra(NOTIF_MSG, message.message)
         intent.putExtra(NOTIF_VALIDITY, message.validity)
         intent.putExtra(NOTIF_FIXED, message.isNotificationFixed)
+        intent.putExtra(NOTIF_REMOVE_ON_OFFER_ENDS, message.isNotificationRemoveOnOfferEnds)
 
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         val time = sdf.parse(message.time!!)?.time!!
