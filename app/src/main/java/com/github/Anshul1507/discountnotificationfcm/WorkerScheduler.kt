@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Handler
+import android.os.Looper
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.Worker
@@ -20,7 +21,7 @@ class WorkerScheduler(val context: Context, params: WorkerParameters) : Worker(c
         const val NOTIF_MSG = "notif_msg"
         const val NOTIF_VALIDITY = "notif_validity"
 
-        lateinit var handler: Handler
+        val handler: Handler = Handler(Looper.getMainLooper())
     }
 
     lateinit var handleRunnable: Runnable
@@ -72,7 +73,6 @@ class WorkerScheduler(val context: Context, params: WorkerParameters) : Worker(c
         val PROGRESS_MAX = validity?.toInt() //secs
         var PROGRESS = 0
 
-        handler = Handler(context.mainLooper)
         NotificationManagerCompat.from(context).apply {
             handleRunnable = object : Runnable {
                 override fun run() {

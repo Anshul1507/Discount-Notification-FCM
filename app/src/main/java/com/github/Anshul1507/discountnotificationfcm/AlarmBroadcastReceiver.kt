@@ -13,16 +13,19 @@ import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.N
 import androidx.core.app.NotificationManagerCompat
 import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.handler
 
+
 class AlarmBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent != null) {
-            if(intent.action.toString()[0] == 'D'){
+            if (intent.action.toString()[0] == 'D') {
                 //Dismiss notification based on their IDs
                 handler.removeCallbacksAndMessages(null)
-                val notifDismissId = intent.action.toString().removeRange(0..1).toInt() //extracting notif_id from "D-1003"
-                NotificationManagerCompat.from(context!!.applicationContext).cancel(null, notifDismissId);
-            }else {
+                val notifDismissId = intent.action.toString().removeRange(0..1)
+                    .toInt() //extracting notif_id from "D-1003"
+                NotificationManagerCompat.from(context!!.applicationContext)
+                    .cancel(null, notifDismissId);
+            } else {
                 val id = intent.getStringExtra(NOTIF_ID)
                 val label = intent.getStringExtra(NOTIF_LABEL)
                 val msg = intent.getStringExtra(NOTIF_MSG)
