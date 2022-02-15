@@ -11,6 +11,7 @@ import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.N
 import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.NOTIF_MSG
 import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.NOTIF_VALIDITY
 import androidx.core.app.NotificationManagerCompat
+import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.NOTIF_FIXED
 import com.github.Anshul1507.discountnotificationfcm.WorkerScheduler.Companion.handler
 
 
@@ -30,12 +31,14 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
                 val label = intent.getStringExtra(NOTIF_LABEL)
                 val msg = intent.getStringExtra(NOTIF_MSG)
                 val validity = intent.getStringExtra(NOTIF_VALIDITY)
+                val isNotifFixed = intent.getBooleanExtra(NOTIF_FIXED, false)
 
                 val notifData = Data.Builder()
                     .putString(NOTIF_ID, id)
                     .putString(NOTIF_LABEL, label)
                     .putString(NOTIF_MSG, msg)
                     .putString(NOTIF_VALIDITY, validity)
+                    .putBoolean(NOTIF_FIXED, isNotifFixed)
                     .build()
 
                 val workJob = OneTimeWorkRequest.Builder(WorkerScheduler::class.java)

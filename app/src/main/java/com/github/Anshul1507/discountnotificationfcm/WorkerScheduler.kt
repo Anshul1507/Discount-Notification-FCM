@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.Worker
@@ -20,8 +21,11 @@ class WorkerScheduler(val context: Context, params: WorkerParameters) : Worker(c
         const val NOTIF_LABEL = "notif_label"
         const val NOTIF_MSG = "notif_msg"
         const val NOTIF_VALIDITY = "notif_validity"
+        const val NOTIF_FIXED = "notif_fixed"
 
         val handler: Handler = Handler(Looper.getMainLooper())
+
+        lateinit var data: Message
     }
 
     lateinit var handleRunnable: Runnable
@@ -32,13 +36,20 @@ class WorkerScheduler(val context: Context, params: WorkerParameters) : Worker(c
         val label = inputData.getString(NOTIF_LABEL)
         val msg = inputData.getString(NOTIF_MSG)
         val validity = inputData.getString(NOTIF_VALIDITY)
+        val isNotifFixed = inputData.getBoolean(NOTIF_FIXED, false)
 
-        showNotification(id!!, label, msg, validity)
+        showNotification(id!!, label, msg, validity, isNotifFixed)
 
         return Result.failure()
     }
 
-    private fun showNotification(ID: Int, label: String?, msg: String?, validity: String?) {
+    private fun showNotification(
+        ID: Int,
+        label: String?,
+        msg: String?,
+        validity: String?,
+        isNotifFixed: Boolean
+    ) {
         val channelID = "notif_offers"
         val channelLabel = "Offers"
 
@@ -69,6 +80,11 @@ class WorkerScheduler(val context: Context, params: WorkerParameters) : Worker(c
             .setAutoCancel(true)
             .setChannelId(channelID)
             .addAction(android.R.drawable.ic_delete, "Dismiss", dismissIntent)
+
+        if (isNotifFixed) {
+            builder.setAutoCancel(false) //auto-cancel means remove notification on click on that
+                .setOngoing(true) //this is the state where notification is non-swipe-able
+        }
 
         val PROGRESS_MAX = validity?.toInt() //secs
         var PROGRESS = 0

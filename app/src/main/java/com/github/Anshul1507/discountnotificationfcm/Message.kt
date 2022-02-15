@@ -5,5 +5,6 @@ data class Message(
     val label: String?,
     val message: String?,
     val validity: String?,
-    val time: String?
+    val time: String?,
+    val isNotificationFixed: Boolean,
 )
