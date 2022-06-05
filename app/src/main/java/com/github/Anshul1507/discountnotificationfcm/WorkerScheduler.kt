@@ -49,7 +49,7 @@ class WorkerScheduler(private val context: Context, params: WorkerParameters) : 
         intent.action = ("D-" + data.id)
 
         val dismissIntent: PendingIntent =
-            PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         val builder = NotificationCompat.Builder(context.applicationContext, channelID)
             .setContentTitle(data.label)
             .setContentText(data.message)

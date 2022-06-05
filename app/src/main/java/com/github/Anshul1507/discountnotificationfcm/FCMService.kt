@@ -48,7 +48,7 @@ class FCMService : FirebaseMessagingService() {
             applicationContext,
             0,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
         alarmManager.set(
             AlarmManager.RTC_WAKEUP,
